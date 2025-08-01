@@ -9,6 +9,10 @@ on:
       aws-region:
         required: true
         type: string
+      working-directory:
+        required: false
+        type: string
+        default: "."
     secrets:
       TF_GITHUB_PAT:
         required: true
@@ -38,9 +42,12 @@ jobs:
 
       - name: Terraform Init
         run: terraform init
+        working-directory: ${{ inputs.working-directory }}
 
       - name: Terraform Plan
         run: terraform plan
+        working-directory: ${{ inputs.working-directory }}
 
       - name: Terraform Apply
         run: terraform apply -auto-approve
+        working-directory: ${{ inputs.working-directory }}
