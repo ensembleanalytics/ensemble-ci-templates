@@ -45,7 +45,7 @@ jobs:
         working-directory: ${{ inputs.working-directory }}
 
       - name: Terraform Plan
-        run: terraform plan
+        run: terraform plan -lock=false
         working-directory: ${{ inputs.working-directory }}
 
       # - name: Terraform Apply
