@@ -23,7 +23,7 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     env:
-      TF_VAR_OIDC_CLIENT_SECRET: ${{ TF_VAR_OIDC_CLIENT_SECRET }}
+      TF_VAR_OIDC_CLIENT_SECRET: ${{ secrets.TF_VAR_OIDC_CLIENT_SECRET }}
 
     steps:
       - name: Checkout repo
