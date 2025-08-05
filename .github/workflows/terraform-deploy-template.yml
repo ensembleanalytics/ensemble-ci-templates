@@ -16,10 +16,14 @@ on:
     secrets:
       TF_GITHUB_PAT:
         required: true
+      TF_VAR_OIDC_CLIENT_SECRET:
+        required: false
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    env:
+      TF_VAR_OIDC_CLIENT_SECRET: ${{ TF_VAR_OIDC_CLIENT_SECRET }}
 
     steps:
       - name: Checkout repo
