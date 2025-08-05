@@ -49,11 +49,15 @@ jobs:
         working-directory: ${{ inputs.working-directory }}
 
       - name: Terraform Plan
+        env:
+          TF_VAR_OIDC_CLIENT_SECRET: ${{ secrets.TF_VAR_OIDC_CLIENT_SECRET }}
         run: |
           terraform plan -lock=false -detailed-exitcode -out=tfplan || exit_code=$?
           echo "Terraform exited with code: $exit_code"
         working-directory: ${{ inputs.working-directory }}
 
       # - name: Terraform Apply
+      #   env:
+      #     TF_VAR_OIDC_CLIENT_SECRET: ${{ secrets.TF_VAR_OIDC_CLIENT_SECRET }}
       #   run: terraform apply -auto-approve
       #   working-directory: ${{ inputs.working-directory }}
