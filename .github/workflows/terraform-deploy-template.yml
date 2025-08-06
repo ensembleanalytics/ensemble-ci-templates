@@ -42,9 +42,13 @@ jobs:
           git config --global url."https://${TF_GITHUB_PAT}@github.com/".insteadOf "https://github.com/"
 
       - name: Setup Terraform
+        env:
+          TF_VAR_OIDC_CLIENT_SECRET: ${{ secrets.TF_VAR_OIDC_CLIENT_SECRET }}
         uses: hashicorp/setup-terraform@v3
 
       - name: Terraform Init
+        env:
+          TF_VAR_OIDC_CLIENT_SECRET: ${{ secrets.TF_VAR_OIDC_CLIENT_SECRET }}
         run: terraform init
         working-directory: ${{ inputs.working-directory }}
 
