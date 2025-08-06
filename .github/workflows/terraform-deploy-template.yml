@@ -42,19 +42,19 @@ jobs:
           git config --global url."https://${TF_GITHUB_PAT}@github.com/".insteadOf "https://github.com/"
 
       - name: Setup Terraform
-        env:
-          TF_VAR_oidc_client_secret: ${{ secrets.TF_VAR_OIDC_CLIENT_SECRET }}
+        # env:
+        #   TF_VAR_oidc_client_secret: ${{ secrets.TF_VAR_OIDC_CLIENT_SECRET }}
         uses: hashicorp/setup-terraform@v3
 
       - name: Terraform Init
-        env:
-          TF_VAR_oidc_client_secret: ${{ secrets.TF_VAR_OIDC_CLIENT_SECRET }}
+        # env:
+        #   TF_VAR_oidc_client_secret: ${{ secrets.TF_VAR_OIDC_CLIENT_SECRET }}
         run: terraform init
         working-directory: ${{ inputs.working-directory }}
 
       - name: Terraform Plan
-        env:
-          TF_VAR_oidc_client_secret: ${{ secrets.TF_VAR_OIDC_CLIENT_SECRET }}
+        # env:
+        #   TF_VAR_oidc_client_secret: ${{ secrets.TF_VAR_OIDC_CLIENT_SECRET }}
         run: |
           terraform plan -lock=false -detailed-exitcode -out=tfplan || exit_code=$?
           echo "Terraform exited with code: $exit_code"
