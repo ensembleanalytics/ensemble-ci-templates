@@ -49,11 +49,12 @@ jobs:
         working-directory: ${{ inputs.working-directory }}
 
       - name: Terraform Plan
-        run: |
-          terraform plan -lock=false -detailed-exitcode -out=tfplan || exit_code=$?
-          echo "Terraform exited with code: $exit_code"
+        id: plan
+        run: terraform plan -lock=false -detailed-exitcode -out=tfplan
+        continue-on-error: true
         working-directory: ${{ inputs.working-directory }}
 
       - name: Terraform Apply
-        run: terraform apply -auto-approve
+        if: steps.plan.outcome == 'success' && steps.plan.conclusion == 'success'
+        run: terraform apply -auto-approve tfplan
         working-directory: ${{ inputs.working-directory }}
