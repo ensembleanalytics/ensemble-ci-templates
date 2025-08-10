@@ -54,7 +54,7 @@ jobs:
         continue-on-error: true
         working-directory: ${{ inputs.working-directory }}
 
-      # - name: Terraform Apply
-      #   if: steps.plan.outcome == 'success' && steps.plan.conclusion == 'success'
-      #   run: terraform apply -auto-approve tfplan
-      #   working-directory: ${{ inputs.working-directory }}
+      - name: Terraform Apply
+        if: steps.plan.outcome == 'success' && steps.plan.conclusion == 'success'
+        run: terraform apply -auto-approve tfplan
+        working-directory: ${{ inputs.working-directory }}
