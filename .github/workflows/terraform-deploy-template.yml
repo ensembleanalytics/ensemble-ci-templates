@@ -40,6 +40,7 @@ jobs:
           TF_GITHUB_PAT: ${{ secrets.TF_GITHUB_PAT }}
         run: |
           git config --global url."https://${TF_GITHUB_PAT}@github.com/".insteadOf "https://github.com/"
+          git config --global url."https://${TF_GITHUB_PAT}@github.com/".insteadOf "git@github.com:"
 
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
