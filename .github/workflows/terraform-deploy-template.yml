@@ -55,6 +55,6 @@ jobs:
         working-directory: ${{ inputs.working-directory }}
 
       - name: Terraform Apply
-        if: steps.plan.outcome == 'success' && steps.plan.conclusion == 'success'
+        if: steps.plan.outcome == 'success'
         run:  terraform apply -lock=false -auto-approve tfplan
         working-directory: ${{ inputs.working-directory }}
