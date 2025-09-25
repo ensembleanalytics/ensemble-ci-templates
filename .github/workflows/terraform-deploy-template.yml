@@ -51,9 +51,10 @@ jobs:
       - name: Terraform Plan
         id: plan
         run: |
-            terraform plan -out=tfplan
-            exitcode=$?
-            if [ $exitcode -eq 1 ]; then
+            set -e
+            terraform plan -out=tfplan || EXITCODE=$?
+            echo "Terraform plan exit code: ${EXITCODE:-0}"
+            if [ "${EXITCODE:-0}" -eq 1 ]; then
               echo "Terraform plan failed"
               exit 1
             fi
