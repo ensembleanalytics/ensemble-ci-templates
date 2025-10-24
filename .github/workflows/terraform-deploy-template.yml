@@ -13,6 +13,10 @@ on:
         required: false
         type: string
         default: "."
+      environment:
+          required: false
+          type: string
+          description: "GitHub Environment for approvals and environment variables"
     secrets:
       TF_GITHUB_PAT:
         required: true
