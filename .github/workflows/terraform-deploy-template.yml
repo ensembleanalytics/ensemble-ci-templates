@@ -26,7 +26,7 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    environment: ${{ inputs.environment || null }}
+    environment: ${{ inputs.environment }}
     env:
       TF_VAR_oidc_client_secret: ${{ secrets.TF_VAR_OIDC_CLIENT_SECRET }}
 
