@@ -30,9 +30,9 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    environment: \${{ inputs.environment || null }}
+    environment: ${{ inputs.environment || null }}
     env:
-      TF_VAR_oidc_client_secret: \${{ secrets.TF_VAR_OIDC_CLIENT_SECRET }}
+      TF_VAR_oidc_client_secret: ${{ secrets.TF_VAR_OIDC_CLIENT_SECRET }}
 
     steps:
       - name: Checkout repo
@@ -41,33 +41,33 @@ jobs:
       - name: Configure AWS credentials (OIDC)
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          role-to-assume: \${{ inputs.role-to-assume }}
-          aws-region: \${{ inputs.aws-region }}
+          role-to-assume: ${{ inputs.role-to-assume }}
+          aws-region: ${{ inputs.aws-region }}
 
       - name: Configure Git credentials for private modules
         env:
-          TF_GITHUB_PAT: \${{ secrets.TF_GITHUB_PAT }}
+          TF_GITHUB_PAT: ${{ secrets.TF_GITHUB_PAT }}
         run: |
-          git config --global url."https://\${TF_GITHUB_PAT}@github.com/".insteadOf "https://github.com/"
+          git config --global url."https://${TF_GITHUB_PAT}@github.com/".insteadOf "https://github.com/"
 
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
 
       - name: Terraform Init
-        working-directory: \${{ inputs.working-directory }}
+        working-directory: ${{ inputs.working-directory }}
         run: terraform init -reconfigure
 
       - name: Terraform Plan
         id: plan
-        working-directory: \${{ inputs.working-directory }}
+        working-directory: ${{ inputs.working-directory }}
         run: |
-          terraform plan -out=tfplan -detailed-exitcode || EXIT_CODE=\$?
-          if [ "\${EXIT_CODE:-0}" -eq 1 ]; then
+          terraform plan -out=tfplan -detailed-exitcode || EXIT_CODE=$?
+          if [ "${EXIT_CODE:-0}" -eq 1 ]; then
             echo "::error::Terraform plan failed"
             exit 1
           fi
 
       - name: Terraform Apply
         if: steps.plan.outcome == 'success' && inputs.plan-only == false
-        working-directory: \${{ inputs.working-directory }}
+        working-directory: ${{ inputs.working-directory }}
         run: terraform apply -auto-approve tfplan
