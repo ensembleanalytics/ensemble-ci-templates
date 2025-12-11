@@ -52,6 +52,16 @@ jobs:
           git config --global url."https://${TF_GITHUB_PAT}@github.com/".insteadOf "ssh://git@github.com/"
           git config --global url."https://${TF_GITHUB_PAT}@github.com/".insteadOf "git@github.com:"
 
+      ## DEBUGGING REMOVE AFTER TESTING ##
+      - name: Debug - Test git access
+        run: |
+          echo "Checking git config:"
+          git config --global --list | grep url
+          echo ""
+          echo "Testing clone:"
+          git ls-remote https://github.com/ensembleanalytics/ensemble-terraform-aws-rds-aurora.git HEAD
+      ## DEBUGGING REMOVE AFTER TESTING ##
+      
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
 
