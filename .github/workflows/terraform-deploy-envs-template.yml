@@ -1,4 +1,4 @@
-name: Terraform Deploy Template
+name: Terraform Deploy Template (Promote Envs)
 
 on:
   workflow_call:
