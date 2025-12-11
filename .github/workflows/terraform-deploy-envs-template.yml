@@ -51,13 +51,13 @@ jobs:
           git config --global url."https://${TF_GITHUB_PAT}@github.com/".insteadOf "https://github.com/"
 
       ## DEBUGGING REMOVE AFTER TESTING ##
-      - name: Debug - Test git access
-        run: |
-          echo "Checking git config:"
-          git config --global --list | grep url
-          echo ""
-          echo "Testing clone:"
-          git ls-remote https://github.com/ensembleanalytics/ensemble-terraform-aws-rds-aurora.git HEAD
+      # - name: Debug - Test git access
+      #   run: |
+      #     echo "Checking git config:"
+      #     git config --global --list | grep url
+      #     echo ""
+      #     echo "Testing clone:"
+      #     git ls-remote https://github.com/ensembleanalytics/ensemble-terraform-aws-rds-aurora.git HEAD
 
       - name: Configure Git credentials for private modules
         env:
