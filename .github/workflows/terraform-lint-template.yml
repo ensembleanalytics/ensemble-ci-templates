@@ -33,42 +33,42 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Configure Git credentials for private modules
-        if: \${{ secrets.TF_GITHUB_PAT != '' }}
+        if: ${{ secrets.TF_GITHUB_PAT != '' }}
         env:
-          TF_GITHUB_PAT: \${{ secrets.TF_GITHUB_PAT }}
+          TF_GITHUB_PAT: ${{ secrets.TF_GITHUB_PAT }}
         run: |
-          git config --global url."https://\${TF_GITHUB_PAT}@github.com/".insteadOf "https://github.com/"
+          git config --global url."https://${TF_GITHUB_PAT}@github.com/".insteadOf "https://github.com/"
 
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
 
       - name: Terraform Format Check
-        working-directory: \${{ inputs.working-directory }}
+        working-directory: ${{ inputs.working-directory }}
         run: terraform fmt -check -recursive -diff
 
       - name: Terraform Init (for validate)
-        working-directory: \${{ inputs.working-directory }}
+        working-directory: ${{ inputs.working-directory }}
         run: terraform init -backend=false
 
       - name: Terraform Validate
-        working-directory: \${{ inputs.working-directory }}
+        working-directory: ${{ inputs.working-directory }}
         run: terraform validate
 
       - name: Setup TFLint
         uses: terraform-linters/setup-tflint@v4
 
       - name: TFLint Init
-        working-directory: \${{ inputs.working-directory }}
+        working-directory: ${{ inputs.working-directory }}
         run: tflint --init
 
       - name: TFLint Run
-        working-directory: \${{ inputs.working-directory }}
+        working-directory: ${{ inputs.working-directory }}
         run: tflint --recursive
 
   security:
     name: Security Scan
     runs-on: ubuntu-latest
-    if: \${{ inputs.run-security-scan }}
+    if: ${{ inputs.run-security-scan }}
 
     steps:
       - name: Checkout
@@ -78,7 +78,7 @@ jobs:
         uses: aquasecurity/trivy-action@master
         with:
           scan-type: "config"
-          scan-ref: \${{ inputs.working-directory }}
-          exit-code: \${{ inputs.fail-on-security-issues && '1' || '0' }}
-          severity: \${{ inputs.security-severity }}
+          scan-ref: ${{ inputs.working-directory }}
+          exit-code: ${{ inputs.fail-on-security-issues && '1' || '0' }}
+          severity: ${{ inputs.security-severity }}
           format: "table"
