@@ -49,8 +49,6 @@ jobs:
           TF_GITHUB_PAT: ${{ secrets.TF_GITHUB_PAT }}
         run: |
           git config --global url."https://${TF_GITHUB_PAT}@github.com/".insteadOf "https://github.com/"
-          # git config --global url."https://${TF_GITHUB_PAT}@github.com/".insteadOf "ssh://git@github.com/"
-          # git config --global url."https://${TF_GITHUB_PAT}@github.com/".insteadOf "git@github.com:"
 
       ## DEBUGGING REMOVE AFTER TESTING ##
       - name: Debug - Test git access
