@@ -37,6 +37,8 @@ jobs:
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Configure AWS credentials (OIDC)
         uses: aws-actions/configure-aws-credentials@v4
@@ -49,7 +51,46 @@ jobs:
           TF_GITHUB_PAT: ${{ secrets.TF_GITHUB_PAT }}
         run: |
           git config --global url."https://${TF_GITHUB_PAT}@github.com/".insteadOf "https://github.com/"
-      
+
+      - name: Setup Python (for lambda dependency installs)
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install lambda deps only if requirements.txt changed
+        shell: bash
+        run: |
+          set -euo pipefail
+          
+          if [ "${GITHUB_EVENT_NAME}" = "pull_request" ]; then
+            BASE_SHA="${{ github.event.pull_request.base.sha }}"
+            HEAD_SHA="${{ github.event.pull_request.head.sha }}"
+          else
+            BASE_SHA="${{ github.event.before }}"
+            HEAD_SHA="${{ github.sha }}"
+          fi
+          
+          echo "Diffing $BASE_SHA..$HEAD_SHA"
+          
+          echo "Changed files:"
+          git diff --name-only "$BASE_SHA" "$HEAD_SHA" || true
+          
+          changed_reqs=$(git diff --name-only "$BASE_SHA" "$HEAD_SHA" \
+            | grep -E '^infra/aws/modules/lambdas/[^/]+/[^/]+/requirements\.txt$' || true)
+          
+          if [ -z "$changed_reqs" ]; then
+            echo "No lambda requirements.txt changes detected. Skipping pip installs."
+            exit 0
+          fi
+          
+          python -m pip install --upgrade pip
+          
+          while IFS= read -r req; do
+            code_dir="$(dirname "$req")"
+            echo "Installing deps into: $code_dir"
+            python -m pip install -r "$req" -t "$code_dir"
+          done <<< "$changed_reqs"
+
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
 
