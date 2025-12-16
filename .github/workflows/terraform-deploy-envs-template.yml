@@ -72,24 +72,27 @@ jobs:
           
           echo "Diffing $BASE_SHA..$HEAD_SHA"
           
-          echo "Changed files:"
-          git diff --name-only "$BASE_SHA" "$HEAD_SHA" || true
+          changed_lambda_dirs=$(git diff --name-only "$BASE_SHA" "$HEAD_SHA" \
+            | grep -E '^infra/aws/modules/lambdas/[^/]+/[^/]+' \
+            | awk -F/ '{print $1"/"$2"/"$3"/"$4"/"$5"/"$6}' \
+            | sort -u || true)
           
-          changed_reqs=$(git diff --name-only "$BASE_SHA" "$HEAD_SHA" \
-            | grep -E '^infra/aws/modules/lambdas/[^/]+/[^/]+/requirements\.txt$' || true)
-          
-          if [ -z "$changed_reqs" ]; then
-            echo "No lambda requirements.txt changes detected. Skipping pip installs."
+          if [ -z "$changed_lambda_dirs" ]; then
+            echo "No lambda code changes detected. Skipping pip installs."
             exit 0
           fi
           
           python -m pip install --upgrade pip
           
-          while IFS= read -r req; do
-            code_dir="$(dirname "$req")"
+          while IFS= read -r code_dir; do
+            req="$code_dir/requirements.txt"
+            if [ ! -f "$req" ]; then
+              echo "No requirements.txt found in $code_dir, skipping"
+              continue
+            fi
             echo "Installing deps into: $code_dir"
             python -m pip install -r "$req" -t "$code_dir"
-          done <<< "$changed_reqs"
+          done <<< "$changed_lambda_dirs"
 
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
