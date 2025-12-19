@@ -52,38 +52,50 @@ jobs:
         run: |
           git config --global url."https://${TF_GITHUB_PAT}@github.com/".insteadOf "https://github.com/"
 
+      # --------- Detect whether this repo has lambda requirements ----------
+      - name: Detect lambda requirements
+        id: lambda_reqs
+        shell: bash
+        run: |
+          set -euo pipefail
+          LAMBDA_ROOT="infra/aws/modules/lambdas"
+
+          if [ ! -d "$LAMBDA_ROOT" ]; then
+            echo "found=false" >> "$GITHUB_OUTPUT"
+            echo "No $LAMBDA_ROOT directory."
+            exit 0
+          fi
+
+          if find "$LAMBDA_ROOT" -type f -name requirements.txt -print -quit | grep -q .; then
+            echo "found=true" >> "$GITHUB_OUTPUT"
+            echo "Found requirements.txt under $LAMBDA_ROOT."
+          else
+            echo "found=false" >> "$GITHUB_OUTPUT"
+            echo "No requirements.txt under $LAMBDA_ROOT."
+          fi
+
+      # --------- Python setup only when lambdas exist ----------
       - name: Setup Python (for lambda dependency installs)
+        if: ${{ steps.lambda_reqs.outputs.found == 'true' }}
         uses: actions/setup-python@v5
         with:
           python-version: "3.11"
           cache: "pip"
+          cache-dependency-path: "infra/aws/modules/lambdas/**/requirements.txt"
 
-      - name: Install lambda deps (only if lambdas exist)
+      # --------- Install lambda deps (always when requirements exist) ----------
+      - name: Install lambda deps
+        if: ${{ steps.lambda_reqs.outputs.found == 'true' }}
         shell: bash
         run: |
           set -euo pipefail
-
-          LAMBDA_ROOT="infra/aws/modules/lambdas"
-          if [ ! -d "$LAMBDA_ROOT" ]; then
-            echo "No $LAMBDA_ROOT directory. Skipping lambda dependency installs."
-            exit 0
-          fi
-
-          # Find all requirements.txt under the lambdas tree
-          mapfile -t req_files < <(find "$LAMBDA_ROOT" -name requirements.txt -print)
-
-          if [ "${#req_files[@]}" -eq 0 ]; then
-            echo "No requirements.txt files found under $LAMBDA_ROOT. Skipping."
-            exit 0
-          fi
-
           python -m pip install --upgrade pip
 
-          for req in "${req_files[@]}"; do
+          while IFS= read -r req; do
             code_dir="$(dirname "$req")"
             echo "Installing deps into: $code_dir"
             python -m pip install -r "$req" -t "$code_dir"
-          done
+          done < <(find infra/aws/modules/lambdas -type f -name requirements.txt | sort)
 
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
@@ -92,17 +104,27 @@ jobs:
         working-directory: ${{ inputs.working-directory }}
         run: terraform init -reconfigure
 
+      # --------- Plan: capture detailed exit code as output ----------
       - name: Terraform Plan
         id: plan
+        shell: bash
         working-directory: ${{ inputs.working-directory }}
         run: |
-          terraform plan -out=tfplan -detailed-exitcode || EXIT_CODE=$?
-          if [ "${EXIT_CODE:-0}" -eq 1 ]; then
+          set +e
+          terraform plan -out=tfplan -detailed-exitcode
+          ec=$?
+          set -e
+
+          echo "exit_code=$ec" >> "$GITHUB_OUTPUT"
+          echo "Terraform plan exit code: $ec"
+
+          if [ "$ec" -eq 1 ]; then
             echo "::error::Terraform plan failed"
             exit 1
           fi
 
+      # Apply only if there are changes (exit code 2) and not plan-only
       - name: Terraform Apply
-        if: steps.plan.outcome == 'success' && inputs.plan-only == false
+        if: ${{ steps.plan.outputs.exit_code == '2' && !inputs.plan-only }}
         working-directory: ${{ inputs.working-directory }}
         run: terraform apply -auto-approve tfplan
