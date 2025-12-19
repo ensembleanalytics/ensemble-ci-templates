@@ -111,11 +111,11 @@ jobs:
         run: |
           set +e
           terraform plan -out=tfplan -detailed-exitcode
-          ec=\$?
+          ec=$?
           set -e
       
           echo "Terraform plan exit code: $ec"
-          echo "exit_code=\$ec" >> "$GITHUB_OUTPUT"
+          echo "exit_code=$ec" >> "$GITHUB_OUTPUT"
       
           if [ "$ec" -eq 1 ]; then
             echo "::error::Terraform plan failed"
