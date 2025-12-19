@@ -107,21 +107,23 @@ jobs:
       # --------- Plan: capture detailed exit code as output ----------
       - name: Terraform Plan
         id: plan
-        shell: bash
-        working-directory: ${{ inputs.working-directory }}
+        working-directory: \${{ inputs.working-directory }}
         run: |
           set +e
           terraform plan -out=tfplan -detailed-exitcode
-          ec=$?
+          ec=\$?
           set -e
-
-          echo "exit_code=$ec" >> "$GITHUB_OUTPUT"
-          echo "Terraform plan exit code: $ec"
-
-          if [ "$ec" -eq 1 ]; then
+      
+          echo "Terraform plan exit code: \$ec"
+          echo "exit_code=\$ec" >> "\$GITHUB_OUTPUT"
+      
+          if [ "\$ec" -eq 1 ]; then
             echo "::error::Terraform plan failed"
             exit 1
           fi
+          
+          # Exit 0 so the step succeeds (exit code 2 means success with changes)
+          exit 0
 
       # Apply only if there are changes (exit code 2) and not plan-only
       - name: Terraform Apply
