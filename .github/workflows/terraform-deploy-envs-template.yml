@@ -107,17 +107,17 @@ jobs:
       # --------- Plan: capture detailed exit code as output ----------
       - name: Terraform Plan
         id: plan
-        working-directory: \${{ inputs.working-directory }}
+        working-directory: ${{ inputs.working-directory }}
         run: |
           set +e
           terraform plan -out=tfplan -detailed-exitcode
           ec=\$?
           set -e
       
-          echo "Terraform plan exit code: \$ec"
-          echo "exit_code=\$ec" >> "\$GITHUB_OUTPUT"
+          echo "Terraform plan exit code: $ec"
+          echo "exit_code=\$ec" >> "$GITHUB_OUTPUT"
       
-          if [ "\$ec" -eq 1 ]; then
+          if [ "$ec" -eq 1 ]; then
             echo "::error::Terraform plan failed"
             exit 1
           fi
