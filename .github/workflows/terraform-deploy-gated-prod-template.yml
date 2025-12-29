@@ -3,6 +3,7 @@ name: Terraform Deploy Template (Prod Gated)
 permissions:
   contents: read
   issues: write
+  id-token: write
 
 on:
   workflow_call:
