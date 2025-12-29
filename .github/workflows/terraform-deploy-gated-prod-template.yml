@@ -1,5 +1,9 @@
 name: Terraform Deploy Template (Prod Gated)
 
+permissions:
+  contents: read
+  issues: write
+
 on:
   workflow_call:
     inputs:
@@ -20,6 +24,18 @@ on:
         required: false
         type: boolean
         default: false
+      approvers:
+        required: true
+        type: string
+      minimum-approvals:
+        required: false
+        type: number
+        default: 1
+      approval-comment:
+        required: false
+        type: string
+        default: "approved"
+
     secrets:
       TF_GITHUB_PAT:
         required: true
@@ -151,6 +167,22 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
+      
+      - name: Manual approval required for PROD apply
+        uses: trstringer/manual-approval@v1
+        with:
+          secret: ${{ github.token }}
+          approvers: ${{ inputs.approvers }}
+          minimum-approvals: ${{ inputs.minimum-approvals }}
+          issue-title: "Approve PROD deploy: ${{ github.repository }} @ ${{ github.sha }}"
+          issue-body: |
+            Type **${{ inputs.approval-comment }}** to approve this production apply.
+
+            - Repo: ${{ github.repository }}
+            - Ref: ${{ github.ref }}
+            - SHA: ${{ github.sha }}
+            - Run: ${{ github.run_id }}
+          approval-comment: ${{ inputs.approval-comment }}
 
       - name: Configure AWS credentials (OIDC)
         uses: aws-actions/configure-aws-credentials@v4
