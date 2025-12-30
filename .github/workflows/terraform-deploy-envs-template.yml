@@ -94,6 +94,9 @@ jobs:
 
           python -m pip install --upgrade pip
 
+          find services/lambdas -type f -name "*.zip" -delete || true
+          find infra -type f -name "*.zip" -delete || true
+
           while IFS= read -r req; do
             lambda_dir="$(dirname "$req")"
             src_dir="$lambda_dir/src"
