@@ -69,7 +69,7 @@ jobs:
             exit 0
           fi
 
-          if find "$LAMBDA_ROOT" -maxdepth 2 -type f -name requirements.txt -print -quit | grep -q .; then
+          if find "$LAMBDA_ROOT" -type f -name requirements.txt -print -quit | grep -q .; then
             echo "found=true" >> "$GITHUB_OUTPUT"
             echo "Found requirements.txt under $LAMBDA_ROOT."
           else
@@ -105,7 +105,7 @@ jobs:
 
             echo "Installing deps for $lambda_dir into $src_dir"
             python -m pip install -r "$req" -t "$src_dir"
-          done < <(find "$LAMBDA_ROOT" -maxdepth 2 -type f -name requirements.txt | sort)
+          done < <(find "$LAMBDA_ROOT" -type f -name requirements.txt | sort)
 
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
